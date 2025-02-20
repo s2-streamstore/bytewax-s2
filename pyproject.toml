@@ -1,11 +1,19 @@
 [project]
 name = "bytewax-s2"
 version = "0.0.0"
-description = "WIP"
+description = "Bytewax connector for S2"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "bytewax>=0.21.1",
+    "requests>=2.32.3",
+    "sseclient-py>=1.8.0",
+    "types-requests>=2.32.0.20241016",
+]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = ["mypy>=1.15.0", "ruff>=0.9.6"]
