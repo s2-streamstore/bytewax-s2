@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import Enum
 
 
 @dataclass(slots=True, frozen=True)
@@ -50,3 +51,8 @@ class S2SinkRecord:
 
     body: bytes
     headers: list[tuple[bytes, bytes]] = field(default_factory=list)
+
+
+class S2SinkPartitionFn(Enum):
+    HASHED = 1
+    DIRECT = 2

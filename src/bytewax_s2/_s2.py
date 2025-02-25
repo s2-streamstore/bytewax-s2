@@ -3,6 +3,7 @@ import random
 import time
 from base64 import b64decode, b64encode
 from typing import Callable, Generator
+from urllib.parse import quote
 
 from requests import Session
 from requests.adapters import HTTPAdapter
@@ -135,7 +136,7 @@ class S2:
         return streams
 
     def check_head(self, stream: str) -> int:
-        url = f"{self._base_url}/{stream}/records"
+        url = f"{self._base_url}/{_quoted(stream)}/records"
         params = {"start_seq_num": 0}
         response = self._retrier(self._session.get, url, params=params).json()
         if "first_seq_num" in response.keys():
@@ -146,12 +147,12 @@ class S2:
             raise RuntimeError(f"Unable to determine head of the stream: {stream}")
 
     def check_tail(self, stream: str) -> int:
-        url = f"{self._base_url}/{stream}/records/tail"
+        url = f"{self._base_url}/{_quoted(stream)}/records/tail"
         response = self._retrier(self._session.get, url).json()
         return response["next_seq_num"]
 
     def append(self, stream: str, records: list[S2SinkRecord]) -> None:
-        url = f"{self._base_url}/{stream}/records"
+        url = f"{self._base_url}/{_quoted(stream)}/records"
         body = {
             "records": [
                 {
@@ -170,7 +171,7 @@ class S2:
     def read(
         self, stream: str, start_seq_num: int
     ) -> Generator[list[S2SourceRecord], None, None]:
-        url = f"{self._base_url}/{stream}/records"
+        url = f"{self._base_url}/{_quoted(stream)}/records"
         params = {"start_seq_num": start_seq_num}
         headers = {
             "Accept": "text/event-stream",
@@ -213,3 +214,7 @@ class S2:
 def _event_source(response: Response) -> Generator[bytes, None, None]:
     for data in response:
         yield data
+
+
+def _quoted(stream: str) -> str:
+    return quote(stream, safe="")
