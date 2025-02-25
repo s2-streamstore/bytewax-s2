@@ -223,12 +223,12 @@ class S2Sink(FixedPartitionedSink):
     def part_fn(self, item_key: str) -> int:
         match self._partition_fn:
             case S2SinkPartitionFn.DIRECT:
-                if item_key in self._partitions:
-                    return self._partition_idx_map[item_key]
-                else:
+                idx = self._partition_idx_map.get(item_key)
+                if idx is None:
                     raise RuntimeError(
                         f"item with key: {item_key} doesn't match any of the existing partitions: {self._partitions}"
                     )
+                return idx
             case S2SinkPartitionFn.HASHED:
                 return super().part_fn(item_key)
             case _:
