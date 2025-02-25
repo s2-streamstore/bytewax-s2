@@ -5,7 +5,7 @@ from bytewax.inputs import FixedPartitionedSource, StatefulSourcePartition
 from bytewax.outputs import FixedPartitionedSink, StatefulSinkPartition
 
 from bytewax_s2._s2 import S2
-from bytewax_s2._types import S2Config, S2SinkRecord, S2SourceRecord
+from bytewax_s2._types import S2Config, S2SinkPartitionFn, S2SinkRecord, S2SourceRecord
 
 
 def _s2_stream_reader(
@@ -156,9 +156,17 @@ class S2Sink(FixedPartitionedSink):
 
     Each stream is considered as a partition.
 
-    Each item from upstream in the dataflow must be a `(key, value)` pair, where `key` must be a `str`
-    that can be hashed for identifying the parition into which the value should get sinked. `value`
-    must be of type `S2SinkRecord`.
+    Each item from upstream in the dataflow must be a `(key, value)` 2-tuple, where `key` must be a `str`
+    and should either:
+    - be hashable for identifying the partition to route the value if the chosen `partition_fn` was
+        `S2SinkPartitionFn.HASHED`
+
+    (or)
+
+    - directly match the partition name (i.e. stream name) if the chosen `partition_fn` was
+        `S2SinkPartitionFn.DIRECT`
+
+    and `value` must be of type `S2SinkRecord`.
 
     Supports at-least-once processing.
     """
@@ -166,15 +174,29 @@ class S2Sink(FixedPartitionedSink):
     __slots__ = (
         "_s2",
         "_partitions",
+        "_partition_fn",
     )
 
-    def __init__(self, config: S2Config, basin: str, stream_prefix: str):
+    def __init__(
+        self,
+        config: S2Config,
+        basin: str,
+        stream_prefix: str,
+        partition_fn: S2SinkPartitionFn = S2SinkPartitionFn.HASHED,
+    ):
         """
         Args:
             config(S2Config): Configuration for S2 client.
             basin(str): Name of the basin.
             stream_prefix(str): Matching prefix for the set of streams that needs to be considered
                 as partitions.
+            partition_fn(S2SinkPartitionFn): Partition function kind.
+
+                - If `S2SinkPartitionFn.DIRECT`, `key` in `(key, value)` 2-tuple passed to sink must match
+                any of the partitions (i.e. stream names).
+                - If `S2SinkPartitionFn.HASHED`, `key` must be a hashable `str`.
+
+                Default value is `S2SinkPartitionFn.HASHED`.
         """
         self._s2 = S2(
             basin,
@@ -184,9 +206,30 @@ class S2Sink(FixedPartitionedSink):
             config.max_retries,
         )
         self._partitions = self._s2.list_streams(stream_prefix)
+        self._partition_fn = partition_fn
+        match partition_fn:
+            case S2SinkPartitionFn.DIRECT:
+                self._partition_idx_map = {
+                    part: idx for idx, part in enumerate(self._partitions)
+                }
+            case S2SinkPartitionFn.HASHED:
+                self._partition_idx_map = {}
+            case _:
+                raise ValueError(f"Unexpected value for partition_fn: {partition_fn}")
 
     def list_parts(self) -> list[str]:
         return self._partitions
+
+    def part_fn(self, item_key: str) -> int:
+        match self._partition_fn:
+            case S2SinkPartitionFn.DIRECT:
+                return self._partition_idx_map[item_key]
+            case S2SinkPartitionFn.HASHED:
+                return super().part_fn(item_key)
+            case _:
+                raise RuntimeError(
+                    f"Unexpected value for partition_fn: {self._partition_fn}"
+                )
 
     def build_part(self, _step_id, for_part, _resume_state):
         return _S2SinkPartition(s2=self._s2, stream=for_part)
