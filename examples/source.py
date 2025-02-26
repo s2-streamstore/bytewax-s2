@@ -135,12 +135,13 @@ chart = TerminalBarChartSink(
 )
 
 
-def handler(_signum, _frame):
+def graceful_exit(_signum, _frame):
     chart.close()
     sys.exit(0)
 
 
-signal.signal(signal.SIGTSTP, handler)
+signal.signal(signal.SIGTSTP, graceful_exit)
+signal.signal(signal.SIGTERM, graceful_exit)
 
 try:
     flow = Dataflow("s2_source_example")
