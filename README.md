@@ -10,18 +10,17 @@
   </p>
 </div>
 
-`bytewax-s2` is the Python package that provides Bytewax connector for S2, which can be used in 
-your bytewax pipelines if you want to read from or append to S2 stream(s).  
+`bytewax-s2` is the Python package that provides [Bytewax](https://bytewax.io/) connector for [S2](https://s2.dev/), which can be used in your bytewax pipelines if you want to read from or append to S2 streams.
 
 ## API overview
 
 The package exposes the following types:
-- `S2Source` - used for reading from S2 stream(s).
-- `S2Sink` - used for appending to S2 stream(s).
+- `S2Source` - used for reading from S2 streams.
+- `S2Sink` - used for appending to S2 streams.
 - `S2Config` - used when initializing `S2Source` and `S2Sink`.
 - `S2SourceRecord` - items read from S2 stream(s) will be of this type.
 - `S2SinkRecord` - items to be appended to S2 stream(s) must be of this type.
-- `S2SinkPartitionFn` - used for routing the item to appropriate S2 stream.
+- `S2SinkPartitionFn` - used for routing the items to appropriate S2 streams.
 
 Please refer to the docstrings of the abovementioned types to know more.
 
