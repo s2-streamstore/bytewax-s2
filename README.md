@@ -18,8 +18,8 @@ The package exposes the following types:
 - `S2Source` - used for reading from S2 streams.
 - `S2Sink` - used for appending to S2 streams.
 - `S2Config` - used when initializing `S2Source` and `S2Sink`.
-- `S2SourceRecord` - items read from S2 stream(s) will be of this type.
-- `S2SinkRecord` - items to be appended to S2 stream(s) must be of this type.
+- `S2SourceRecord` - items read from S2 streams will be of this type.
+- `S2SinkRecord` - items to be appended to S2 streams must be of this type.
 - `S2SinkPartitionFn` - used for routing the items to appropriate S2 streams.
 
 Please refer to the docstrings of the abovementioned types to know more.
@@ -37,4 +37,6 @@ pip install bytewax-s2
 `examples/` directory in the [repo](https://github.com/s2-streamstore/bytewax-s2/tree/main/examples/) contain two bytewax pipelines:
 - `sink.py` - where firehose of events from Bluesky is processed and appended to S2 streams.
 - `source.py` - where processed data is read from S2 streams and insights are plotted in terminal.
+
+If you are interested in knowing more about these pipelines, take a look at this [walkthrough](https://s2.dev/docs/integrations/bytewax#real-time-insights-from-bluesky-firehose-data).
 
