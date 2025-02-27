@@ -10,7 +10,7 @@
   </p>
 </div>
 
-`bytewax-s2` is the Python package that provides [Bytewax](https://bytewax.io/) connector for [S2](https://s2.dev/), which can be used in your bytewax pipelines if you want to read from or append to S2 streams.
+`bytewax-s2` is the Python package that provides [Bytewax](https://bytewax.io/) connector for [S2](https://s2.dev/), which can be used in your Bytewax pipelines if you want to read from or append to S2 streams.
 
 ## API overview
 
@@ -34,7 +34,7 @@ pip install bytewax-s2
 
 ## Examples
 
-`examples/` directory in the [repo](https://github.com/s2-streamstore/bytewax-s2/tree/main/examples/) contain two bytewax pipelines:
+`examples/` directory in the [repo](https://github.com/s2-streamstore/bytewax-s2/tree/main/examples/) contain two Bytewax pipelines:
 - `sink.py` - where firehose of events from Bluesky is processed and appended to S2 streams.
 - `source.py` - where processed data is read from S2 streams and insights are plotted in terminal.
 
