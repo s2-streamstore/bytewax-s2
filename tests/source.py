@@ -1,16 +1,18 @@
 import os
+
 import bytewax.operators as op
-from bytewax.testing import TestingSink, run_main
 from bytewax.dataflow import Dataflow
+from bytewax.testing import TestingSink, run_main
+
 from bytewax_s2 import S2Config, S2Source
 
-AUTH_TOKEN = os.getenv("S2_AUTH_TOKEN")
-BASIN = os.getenv("S2_BASIN")
-STREAM_PREFIX = os.getenv("S2_STREAM_PREFIX")
+AUTH_TOKEN = os.environ["S2_AUTH_TOKEN"]
+BASIN = os.environ["S2_BASIN"]
+STREAM_PREFIX = os.environ["S2_STREAM_PREFIX"]
 
-sink = []
+sink: list[int] = []
 
-flow = Dataflow("s2-source-test")
+flow = Dataflow("s2_source_test")
 int_bytes = op.input(
     "input",
     flow,
@@ -21,7 +23,7 @@ int_bytes = op.input(
         tail=False,
     ),
 )
-ints = op.map("parse-ints", int_bytes, lambda sr: int.from_bytes(sr.body))
+ints = op.map("parse_ints", int_bytes, lambda sr: int.from_bytes(sr.body))
 op.output("output", ints, TestingSink(sink))
 
 run_main(flow)
