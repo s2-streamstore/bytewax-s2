@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.1] - 2025-02-27
+
+### Miscellaneous Tasks
+
+- Update `README` ([#12](https://github.com/s2-streamstore/bytewax-s2/issues/12))
+
 ## [0.1.0] - 2025-02-27
 
 ### Features
