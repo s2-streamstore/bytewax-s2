@@ -14,7 +14,7 @@
 
 ## API overview
 
-The package exposes the following types:
+`bytewax_s2` module in the package exposes the following types:
 - `S2Source` - used for reading from S2 streams.
 - `S2Sink` - used for appending to S2 streams.
 - `S2Config` - used when initializing `S2Source` and `S2Sink`.
