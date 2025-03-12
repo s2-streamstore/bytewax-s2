@@ -32,13 +32,20 @@ def _compute_backoffs(
     return backoffs
 
 
-def _should_retry_on(e: RequestException) -> bool:
+class _SSEError(Exception):
+    def __init__(self, message: str, code: int):
+        super().__init__(message)
+        self.code = code
+
+
+def _should_retry_on(e: RequestException | _SSEError) -> bool:
     if any(
         (
             isinstance(e, ConnectionError),
             isinstance(e, ChunkedEncodingError),
             isinstance(e, HTTPError)
             and e.response.status_code in _RETRYABLE_HTTP_STATUS_CODES,
+            isinstance(e, _SSEError) and e.code in _RETRYABLE_HTTP_STATUS_CODES,
         )
     ):
         return True
@@ -187,9 +194,21 @@ class S2:
                 )
                 sse = SSEClient(_event_source(response))
                 for event in sse.events():
-                    if attempt > 0:
-                        attempt = 0
                     data = json.loads(event.data)
+                    match event.event:
+                        case "message":
+                            if attempt > 0:
+                                attempt = 0
+                        case "error":
+                            raise _SSEError(message=data["message"], code=data["code"])
+                        case "ping":
+                            if attempt > 0:
+                                attempt = 0
+                            continue
+                        case _:
+                            raise RuntimeError(
+                                f"Received unexpected event when reading from stream: {stream}"
+                            )
                     records = [
                         S2SourceRecord(
                             body=b64decode(record["body"]),
@@ -204,9 +223,10 @@ class S2:
                     if len(records) > 0:
                         params["start_seq_num"] = records[-1].seq_num + 1
                     yield records
-            except RequestException as e:
+            except (RequestException, _SSEError) as e:
                 if attempt < max_attempts and _should_retry_on(e):
                     time.sleep(backoffs[attempt])
+                    attempt += 1
                 else:
                     raise e
 
