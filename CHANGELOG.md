@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.2] - 2025-03-12
+
+### Bug Fixes
+
+- Event handling and retries in S2 streaming read ([#15](https://github.com/s2-streamstore/bytewax-s2/issues/15))
+
+### Miscellaneous Tasks
+
+- Update `README` ([#14](https://github.com/s2-streamstore/bytewax-s2/issues/14))
+
 ## [0.1.1] - 2025-02-27
 
 ### Miscellaneous Tasks
